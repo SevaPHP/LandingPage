@@ -159,7 +159,7 @@ window.addEventListener('DOMContentLoaded', ()=> {
 
      
        /* Модальное окно выскакивает через интервал settimr */
-        //const modalTimerId = setTimeout(openModal, 5000);
+        const modalTimerId = setTimeout(openModal, 5000);
        /* Модальное окно выскакивает через интервал settimr */
 
       
@@ -260,6 +260,251 @@ window.addEventListener('DOMContentLoaded', ()=> {
 
      /* Конец Используем классы для карточек */
 
+     /*Отправка данных на сервер*/
+     // forms
+     const forms = document.querySelectorAll('form');
+
+     const message = {
+         loading: 'Загрузка',
+         success: 'Спасибо! Скоро мы с Вами свяжемся',
+         failure: 'Что-то пошло не так...'
+     };
+     //Берем формы и под них подвязываем функцию postDate()
+
+     forms.forEach(item => {
+        postData(item);
+     });
+     function  postData(form) {
+         form.addEventListener('submit', (e) => {
+            //Отменить стандартное поведение браузера
+            e.preventDefault();
+
+            const statusMessage = document.createElement('div');
+            statusMessage.classList.add('status');
+            statusMessage.textContent = message.loading;
+            form.append(statusMessage);
+
+            const request = new XMLHttpRequest();
+
+            request.open('POST', 'server.php');
+            
+            //Когда используем связку xmlhttrequst + form-data - нам заголовок устанавливать не нужно - он автоматом ставится
+            //request.setRequestHeader('Content-type', 'multipart/form-data'); //Именно из-за этой строчки мы не получаем данные на сервере
+            //Отправка для json
+            /*Создание объекта hhtprequest
+            request.setRequestHeader('Content-type', 'application/json');
+            const formData = new FormData(form);*/
+
+          
+            
+            const formData = new FormData(form);
+            const object = {};
+
+            formData.forEach(function(value, key) {
+                object[key] = value;
+            });
+
+            const json = JSON.stringify(object);
+
+            /* request.send(json);*/
+
+            fetch('server.php', {
+                method: "POST",
+                headers: {
+                    'Content-type': 'application/json'
+                },
+                body: json
+            }).then (data => data.text())//Чтобы четко понимать какие данные приходят с сервера, нам нужно этот ответ модифицировать, превращаем наш ответ в обычный текст
+            .then(data => {
+                console.log(data); //data - те даные которые возвращаются из промиса , которые вернул сервер
+                //успешная отправка
+                statusMessage.textContent = message.success;
+                
+                //Удаляем наш блок cообщением.
+                setTimeout(() => {
+                    statusMessage.remove();
+                }, 2000);
+            }).catch( () => {
+                statusMessage.textContent = message.failure;
+            }).finally(() => {
+                //После успешной отправвки очищаем форму
+                form.reset();
+            })
+
+            //Обработка результата нашего запроса
+            /*request.addEventListener('load', () => { //смотрели load - когда запрос полностью завершится
+                if (request.status === 200) { //отслеживаем статус
+                    console.log(request.response); //выполяем определенные действия
+                    //успешная отправка
+                    statusMessage.textContent = message.success;
+                    //После успешной отправвки очищаем форму
+                    form.reset();
+                    //Удаляем наш блок cообщением.
+                    setTimeout(() => {
+                        statusMessage.remove();
+                    }, 2000);
+                } else {
+                    statusMessage.textContent = message.failure;
+
+                }
+            }); 
+            //Обработка результата нашего запроса
+            */
+
+         });
+     }
+
+
+
+
+     /*Конец Отправка данных на сервер*/
+
+
+     /* fetch api */
+     //fetch использует промисы пример тест
+    /* fetch('https://jsonplaceholder.typicode.com/posts', {
+         method: "POST",
+         body: JSON.stringify({name: 'Alex'}),
+         headers: {
+             'Content-type': 'application/json'
+         }
+     })
+     .then(response => response.json())
+     .then(json => console.log(json));
+     */
+     // конец  fetch использует промисы пример тест
+
+
+
+     //npm пакеты - кусочки отдельного кода которые лежат на серверах и которые мы можем устанавливать в свой проект чтобы их использовать
+
+     //Получаем доступ к базе данных db.json
+
+     fetch('db.json')
+     .then(data => data.json())
+     .then(res => console.log(res));
+
+
+     /*Слайдер*/
+        /* Индикаторы */
+    const slider = document.querySelector('.offer__slider');
+    /* Индикаторы */
+     //Сам слайдер
+    const slides = document.querySelectorAll('.offer__slide'),
+     //Стрелка назад
+           prev = document.querySelector('.offer__slider-prev'),
+     //Стрелка вперед
+           next = document.querySelector('.offer__slider-next'),
+           //цифры над слайдером
+           total = document.querySelector('#total'),
+           current = document.querySelector('#current');
+    //Текущее положение слайдера
+            let slideIndex = 1;
+            showSlides(slideIndex);
+     //изменяем количество слайдов
+        if(slides.length < 10){
+                total.textContent = `0${slides.length}`;
+            }  else {
+                total.textContent = slides.length;
+            }
+    //Показываем слайды 
+     function showSlides(n) {
+         //Если больше чем общее кол-во слайдов 
+          if (n > slides.length) {
+            slideIndex = 1;
+          }
+
+          if (n < 1) {
+            slideIndex = slides.length;
+          }
+          //Скрываем все слайды которые есть
+          slides.forEach(item => item.style.display = 'none');
+          //берем нужный слайд и показываем его
+          slides[slideIndex - 1].style.display = 'block';
+          //Слайдер в цифрах меняется
+          if(slides.length < 10){
+            current.textContent = `0${slideIndex}`;
+        }  else {
+            current.textContent = slideIndex;
+        }
+
+       
+     }
+          //Функция которая изменяет
+
+        function plusSlides(n) {
+            showSlides(slideIndex += n);
+        }
+
+        prev.addEventListener('click', () => {
+            plusSlides(-1);
+            /*Индикаторы */
+            dots.forEach(dot => dot.style.opacity = '.5');
+            dots[slideIndex - 1].style.opacity = 1;
+            /*Индикаторы */
+        });
+
+        /* Индикаторы */
+        slider.style.position = 'relative';
+
+        const indicators = document.createElement('ol'),
+              dots = [];
+
+
+
+        indicators.classList.add('carousel-indicators');
+        indicators.style.cssText = `
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 15;
+        display: flex;
+        justify-content: center;
+        margin-right: 15%;
+        margin-left: 15%;
+        list-style: none;
+        `;
+
+        slider.append(indicators);
+
+        for (let i = 0; i < slides.length; i++) {
+            const dot = document.createElement('li');
+            dot.setAttribute('data-slide-to', i + 1);
+            dot.style.cssText = `box-sizing: content-box;
+            flex: 0 1 auto;
+            width: 30px;
+            height: 6px;
+            margin-right: 3px;
+            margin-left: 3px;
+            cursor: pointer;
+            background-color: #fff;
+            background-clip: padding-box;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+            opacity: .5;
+            transition: opacity .6s ease;`;
+
+            if (i == 0) {
+                dot.style.opacity = 1;
+            }
+            indicators.append(dot);
+            dots.push(dot);
+            
+        }
+        /* конец Индикаторов */
+
+
+       next.addEventListener('click', () => {
+            plusSlides(1);
+            /*Индикаторы */
+            dots.forEach(dot => dot.style.opacity = '.5');
+            dots[slideIndex - 1].style.opacity = 1;
+            /*Индикаторы */
+        });
+      /*Конец Слайдер*/
+
 });
 
 
+ 
