@@ -503,6 +503,108 @@ window.addEventListener('DOMContentLoaded', ()=> {
             /*Индикаторы */
         });
       /*Конец Слайдер*/
+      
+
+      /*Калькулятор*/
+        //Берем итоговую цифру class + span ( который внутри него) для вывода результата
+      const result = document.querySelector('.calculating__result span');
+        //Создадим 5 различных переменных которые учавствуют в калькуляторе. создаем их через let т.к они будут меняться 
+        let sex = 'female', height, weight, age, ratio = '1.375 ';
+        //Функция для расчета по формуле дабы подсчитать конечный результат
+        function calcTotal() {
+            //советую начать функцию с проверки
+            if (!sex || !height || !weight || !age || !ratio){
+                result.textContent = '--------'
+                return;
+            } 
+
+            if (sex === 'female') {
+                result.textContent = Math.round((447.6 + (9.2 * weight) + (3.1 * height) - (4.3 * age)) * ratio);
+            } else {
+                result.textContent = Math.round((88.36 + (13.4 * weight)+ (4.8 * height) - (5.7 * age)) * ratio);
+            }
+        }
+
+        calcTotal();
+
+        //Получаем статическую информацию со статических блоков
+        
+        function getStaticInformation(parentSeletor, activeClass) {
+            //Внутри родителя получаем все дивы
+            const elements = document.querySelectorAll(`${parentSeletor} div`);
+           //Отслеживаем клики по родительскому элементу
+            elements.forEach(elem => {
+                elem.addEventListener('click', (e) => {
+                    if( e.target.getAttribute('data-ratio')) {
+                        ratio = +e.target.getAttribute('data-ratio')
+                    } else {
+                        //Когда условия не сработае. 
+                        sex = e.target.getAttribute('id');
+                    }
+   
+                    console.log(ratio, sex);
+                    //Работаем с класом активности, убираем у всех и назначаем тем кому нужно
+                    elements.forEach(elem => {
+                        elem.classList.remove(activeClass);
+                    });
+                    //Назначаем класс активности тому объекту в который кликнули
+                    e.target.classList.add(activeClass);
+                    calcTotal();
+               });
+            });
+        }
+
+
+
+getStaticInformation('#gender', 'calculating__choose-item_active');
+getStaticInformation('.calculating__choose_big', 'calculating__choose-item_active');
+
+ //Функция которя обрабатывает инпут
+
+    function getDymanicInformation(selector) {
+        const input = document.querySelector(selector);
+
+        input.addEventListener('input', () => {
+            //Если пользователь ввел не число
+            if(input.value.match(/\D/g)) {
+                input.style.border = '1px solid red';
+                alert('Введите только цифры');
+            } else {
+                input.style.border = 'none';
+            }
+             switch(input.getAttribute('id')) {
+                 case 'height':
+                     height = +input.value;
+                     break;
+                 case 'weight':
+                     weight = +input.value;
+                     break;  
+                 case 'age':
+                     age = +input.value;
+                     break;    
+             }
+             calcTotal();
+        });
+      
+    }
+
+    getDymanicInformation('#height');
+    getDymanicInformation('#weight');
+    getDymanicInformation('#age');
+
+
+
+
+
+
+
+
+
+
+
+
+
+      /*Конец Калькулятор*/
 
 });
 
